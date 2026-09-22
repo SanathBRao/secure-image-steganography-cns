@@ -53,9 +53,9 @@
           </div>
 
           <div class="form-group">
-            <label>Upload Cover Image (PNG recommended):</label>
+            <label>Upload Cover Image (or Paste directly with <strong>Ctrl + V</strong>):</label>
             <label class="file-dropzone" for="coverInput">
-              📁 Click to Browse or Drop Cover Image
+              📁 Click to Browse, Drag & Drop, or 📋 <strong>Paste Image (Ctrl + V)</strong>
               <input type="file" id="coverInput" accept="image/png, image/bmp, image/jpeg" style="display:none;">
             </label>
           </div>
@@ -166,15 +166,27 @@
         <!-- Left: Upload Stego -->
         <div class="card">
           <h2 class="card-title">1. Upload Stego Image</h2>
+          
+          <button id="btnLoadDemoStego" type="button" class="btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; width:100%; font-size:0.9rem; padding:0.6rem;">
+            🧪 Load Demo Stego Image (Passphrase: <code>demo123</code>)
+          </button>
+
           <div class="form-group">
-            <label>Select Stego PNG Image:</label>
+            <label>Select Stego PNG Image (or Paste directly with <strong>Ctrl + V</strong>):</label>
             <label class="file-dropzone" for="stegoInput">
-              📁 Click to Browse or Drop Stego PNG
+              📁 Click to Browse, Drag & Drop, or 📋 <strong>Paste Image (Ctrl + V)</strong>
               <input type="file" id="stegoInput" accept="image/png, image/bmp" style="display:none;">
             </label>
           </div>
           <div class="preview-box" id="stegoExtractPreview">
-            <span style="color: var(--text-muted);">No stego image loaded</span>
+            <span style="color: var(--text-muted);">No stego image loaded (or press Ctrl + V to paste)</span>
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.75rem; font-size:0.85rem; color:#475569; margin-top:0.5rem;">
+            💡 <strong>Can't find downloaded file or pasting from WhatsApp?</strong><br>
+            • <strong>Press Ctrl + J</strong> in your browser to view your Downloads, and drag the file directly into the box.<br>
+            • <strong>Clipboard:</strong> Copy the image and press <strong>Ctrl + V</strong> anywhere on this page.<br>
+            • ⚠️ <strong>WhatsApp / Discord Warning:</strong> Always send stego images as an uncompressed <em>Document / File</em>. Sending as a regular photo applies lossy JPEG compression that destroys hidden data!
           </div>
         </div>
 

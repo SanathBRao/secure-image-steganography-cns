@@ -106,14 +106,144 @@ function handleCoverFile(file) {
 // Stego file handler
 stegoInput.addEventListener("change", (e) => {
   if (e.target.files && e.target.files[0]) {
-    selectedStegoFile = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      stegoExtractPreview.innerHTML = `<img src="${ev.target.result}" alt="Stego Image Preview">`;
-    };
-    reader.readAsDataURL(selectedStegoFile);
+    handleStegoFile(e.target.files[0]);
   }
 });
+
+function handleStegoFile(file) {
+  selectedStegoFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    stegoExtractPreview.innerHTML = `<img src="${ev.target.result}" alt="Stego Image Preview">`;
+  };
+  reader.readAsDataURL(selectedStegoFile);
+}
+
+// ==============================================================================
+// CLIPBOARD PASTE (CTRL + V) SUPPORT ANYWHERE ON THE PAGE
+// ==============================================================================
+window.addEventListener("paste", (e) => {
+  const items = (e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData))?.items;
+  if (!items) return;
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item.type.indexOf("image") !== -1) {
+      const blob = item.getAsFile();
+      if (!blob) continue;
+
+      // Determine active tab
+      const activeTab = document.querySelector(".tab-content.active");
+      if (activeTab && activeTab.id === "tab-extract") {
+        handleStegoFile(blob);
+        showAlert(extractAlert, "📋 Stego image pasted from clipboard! Enter password and click Decrypt.", "info");
+      } else {
+        handleCoverFile(blob);
+        showAlert(embedAlert, "📋 Cover image pasted from clipboard!", "info");
+      }
+      e.preventDefault();
+      break;
+    }
+  }
+});
+
+// ==============================================================================
+// DRAG AND DROP HANDLERS FOR DROPZONES
+// ==============================================================================
+function setupDropzone(inputId, handlerFn, alertElem, typeName) {
+  const dropzone = document.querySelector(`label[for="${inputId}"]`);
+  if (!dropzone) return;
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add("dragover");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("dragover");
+    });
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handlerFn(files[0]);
+      if (alertElem) {
+        showAlert(alertElem, `📁 ${typeName} loaded via drag & drop!`, "info");
+      }
+    }
+  });
+}
+
+setupDropzone("coverInput", handleCoverFile, embedAlert, "Cover image");
+setupDropzone("stegoInput", handleStegoFile, extractAlert, "Stego image");
+
+// ==============================================================================
+// 1-CLICK DEMO STEGO IMAGE LOADER (FOR INSTANT TESTING WITHOUT DOWNLOADING FILES)
+// ==============================================================================
+const btnLoadDemoStego = document.getElementById("btnLoadDemoStego");
+if (btnLoadDemoStego) {
+  btnLoadDemoStego.addEventListener("click", async () => {
+    btnLoadDemoStego.disabled = true;
+    btnLoadDemoStego.textContent = "⏳ Generating Demo Stego Image...";
+    try {
+      // Create a clean demo 300x200 canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = 300;
+      canvas.height = 200;
+      const ctx = canvas.getContext("2d");
+
+      // Draw gradient background
+      const grad = ctx.createLinearGradient(0, 0, 300, 200);
+      grad.addColorStop(0, "#1e3a8a");
+      grad.addColorStop(1, "#3b82f6");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 300, 200);
+
+      // Draw decorative patterns
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 16px sans-serif";
+      ctx.fillText("CNS Mini Project Demo", 40, 100);
+
+      // Convert canvas to Blob
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      const demoCoverFile = new File([blob], "demo_cover.png", { type: "image/png" });
+
+      const demoMsg = "🎉 Success! You decrypted the CNS Steganography Demo Message (AES-256-GCM + LSB Data Hiding). Both confidentiality and concealment are 100% verified!";
+      const demoPwd = "demo123";
+
+      // Encrypt and embed using client-side engine
+      const res = await clientEncryptAndEmbed(demoCoverFile, demoMsg, demoPwd);
+
+      // Convert base64 stego to Blob File
+      const byteStr = atob(res.stego_image_data.split(",")[1]);
+      const ab = new ArrayBuffer(byteStr.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteStr.length; i++) {
+        ia[i] = byteStr.charCodeAt(i);
+      }
+      const stegoBlob = new Blob([ab], { type: "image/png" });
+      const demoStegoFile = new File([stegoBlob], "demo_stego.png", { type: "image/png" });
+
+      handleStegoFile(demoStegoFile);
+      extractPassword.value = demoPwd;
+      showAlert(extractAlert, "✅ Demo Stego Image loaded with passphrase 'demo123'! Click 'Extract & Decrypt' below.", "success");
+    } catch (err) {
+      showAlert(extractAlert, "Failed to load demo: " + err.message, "danger");
+    } finally {
+      btnLoadDemoStego.disabled = false;
+      btnLoadDemoStego.innerHTML = "🧪 Load Demo Stego Image (Passphrase: <code>demo123</code>)";
+    }
+  });
+}
 
 // Populate sample images if API is available
 fetch("/api/samples")

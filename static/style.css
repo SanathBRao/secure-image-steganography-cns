@@ -193,9 +193,10 @@ select:focus {
   transition: all 0.2s;
 }
 
-.file-dropzone:hover {
+.file-dropzone:hover,
+.file-dropzone.dragover {
   border-color: var(--primary);
-  background: #f1f5f9;
+  background: #e0f2fe;
 }
 
 .btn {
