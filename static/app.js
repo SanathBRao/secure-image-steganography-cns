@@ -20,13 +20,6 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
   });
 });
 
-// FAQ Accordion
-document.querySelectorAll(".faq-q").forEach((q) => {
-  q.addEventListener("click", () => {
-    q.parentElement.classList.toggle("open");
-  });
-});
-
 // State
 let selectedCoverFile = null;
 let selectedStegoFile = null;

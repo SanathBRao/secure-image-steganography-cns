@@ -31,8 +31,6 @@
     <nav class="tabs-nav">
       <button class="tab-btn active" data-tab="tab-hide">🔒 Hide Message (Embedding)</button>
       <button class="tab-btn" data-tab="tab-extract">🔓 Extract Message (Extraction)</button>
-      <button class="tab-btn" data-tab="tab-how-it-works">ℹ️ How It Works & Architecture</button>
-      <button class="tab-btn" data-tab="tab-viva">🎓 Viva & CNS Reference</button>
     </nav>
 
     <!-- ========================================================================= -->
@@ -232,129 +230,6 @@
           <label>Technical Telemetry:</label>
           <pre id="cryptoDetails"></pre>
         </div>
-      </div>
-    </section>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 3: HOW IT WORKS                                                       -->
-    <!-- ========================================================================= -->
-    <section id="tab-how-it-works" class="tab-content">
-      <div class="card">
-        <h2 class="card-title">System Architecture & Mathematical Foundations</h2>
-        
-        <div class="grid-2">
-          <div>
-            <h3 style="margin-bottom: 0.75rem;">🔒 Sender Pipeline (Embedding)</h3>
-            <div class="workflow-step">
-              <strong>1. SHA-256 Integrity Hash:</strong> Computes a 256-bit hash of the original plaintext message for second-layer validation.
-            </div>
-            <div class="workflow-step">
-              <strong>2. PBKDF2 Key Derivation:</strong> Derives a 256-bit AES key from user passphrase using 100,000 iterations of HMAC-SHA256 and a 16-byte random salt.
-            </div>
-            <div class="workflow-step">
-              <strong>3. AES-256-GCM Encryption:</strong> Generates a 12-byte nonce. Encrypts plaintext and yields ciphertext + a 16-byte authentication tag.
-            </div>
-            <div class="workflow-step">
-              <strong>4. Binary Header Packaging:</strong>
-              <code>['STEG' (4B)] + [Salt (16B)] + [Nonce (12B)] + [Tag (16B)] + [SHA256 (32B)] + [CT_Len (4B)] + [Ciphertext]</code>
-            </div>
-            <div class="workflow-step">
-              <strong>5. LSB Spatial Insertion:</strong> Replaces bit 0 of Red, Green, and Blue pixel channels with payload bits. Saved as lossless PNG.
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 0.75rem;">🔓 Receiver Pipeline (Extraction)</h3>
-            <div class="workflow-step">
-              <strong>1. LSB Extraction:</strong> Reads first 32 bits from RGB pixel channels to determine payload length N, then reads N bytes.
-            </div>
-            <div class="workflow-step">
-              <strong>2. Header Validation:</strong> Checks for the <code>'STEG'</code> magic identifier.
-            </div>
-            <div class="workflow-step">
-              <strong>3. Key Reconstruction:</strong> Feeds user-supplied passphrase and extracted 16-byte Salt into PBKDF2.
-            </div>
-            <div class="workflow-step">
-              <strong>4. Authenticated Decryption:</strong> AES-256-GCM decrypts ciphertext and verifies the 16-byte GMAC tag. If password is wrong or bits flipped, halts immediately.
-            </div>
-            <div class="workflow-step">
-              <strong>5. SHA-256 Verification:</strong> Confirms decrypted plaintext hash matches the embedded hash, proving 100% data integrity.
-            </div>
-          </div>
-        </div>
-
-        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border-color);">
-
-        <h3 style="margin-bottom: 0.5rem;">🔬 Bitwise LSB Mechanism (Spatial Domain)</h3>
-        <p style="color: var(--text-muted); margin-bottom: 1rem;">
-          In 24-bit True Color RGB images, each pixel consists of 3 bytes (Red, Green, Blue) from 0 to 255:
-        </p>
-        <pre>
-Original Pixel Channel Byte : 1 0 1 1 0 1 1 0  (Value = 182)
-Clear LSB with mask 0xFE    : 1 0 1 1 0 1 1 0 & 1 1 1 1 1 1 1 0 -> 1 0 1 1 0 1 1 0
-Secret bit to hide          : 1
-Resulting Stego Channel     : 1 0 1 1 0 1 1 1  (Value = 183)
-Difference                  : +1 intensity unit (Imperceptible to Human Visual System!)
-        </pre>
-      </div>
-    </section>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 4: VIVA REFERENCE                                                     -->
-    <!-- ========================================================================= -->
-    <section id="tab-viva" class="tab-content">
-      <div class="card">
-        <h2 class="card-title">🎓 Academic Viva Preparation & Project Defense</h2>
-
-        <div class="grid-2" style="margin-bottom: 1.5rem;">
-          <div style="background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid var(--border-color);">
-            <h4 style="color: var(--primary); margin-bottom:0.5rem;">👥 Member 1: Cryptography & Key Management</h4>
-            <ul style="padding-left: 1.25rem; font-size: 0.9rem;">
-              <li>Implementation of <strong>AES-256-GCM</strong> authenticated encryption.</li>
-              <li>Design of <strong>PBKDF2</strong> with 100,000 iterations and 16-byte random salt.</li>
-              <li>Dual-layer integrity with <strong>SHA-256</strong> hashing.</li>
-              <li>Packaging of the 84-byte binary payload header format.</li>
-            </ul>
-          </div>
-          <div style="background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid var(--border-color);">
-            <h4 style="color: var(--primary); margin-bottom:0.5rem;">👥 Member 2: Steganography & Web Application</h4>
-            <ul style="padding-left: 1.25rem; font-size: 0.9rem;">
-              <li>Implementation of <strong>24-bit RGB LSB</strong> spatial embedding & extraction.</li>
-              <li>Image capacity calculation and boundary checks.</li>
-              <li>Computation of <strong>MSE</strong> and <strong>PSNR</strong> image quality metrics.</li>
-              <li>Full-stack Web UI design and responsive controls.</li>
-            </ul>
-          </div>
-        </div>
-
-        <h3 style="margin-bottom: 1rem;">❓ High-Frequency Viva Questions & Answers</h3>
-
-        <div class="faq-item">
-          <div class="faq-q"><span>Q1: What is the difference between Cryptography and Steganography?</span> <span>+</span></div>
-          <div class="faq-a">Cryptography protects the confidentiality of data by converting plaintext into unreadable ciphertext. Steganography conceals the very existence of the message by hiding it inside an innocuous carrier medium (such as an image). Cryptography makes data secret; steganography makes data invisible.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q"><span>Q2: Why combine AES-256 with LSB steganography in this project?</span> <span>+</span></div>
-          <div class="faq-a">This provides Defense-in-Depth. If an adversary discovers the steganographic carrier (steganalysis), they cannot read the secret data because it is encrypted with military-grade AES-256. Conversely, if encrypted data was sent in the open, it would immediately attract suspicion; hiding it in an image conceals the transmission.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q"><span>Q3: Why use AES-GCM mode instead of AES-CBC or AES-ECB?</span> <span>+</span></div>
-          <div class="faq-a">AES-ECB does not use an IV and reveals data patterns. AES-CBC provides confidentiality but not authenticity (vulnerable to padding oracle attacks). AES-GCM (Galois/Counter Mode) is an AEAD (Authenticated Encryption with Associated Data) scheme that simultaneously provides high-speed confidentiality AND a 128-bit authentication tag to immediately detect tampering or incorrect passwords.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q"><span>Q4: Why is PBKDF2 needed instead of using the user's password directly?</span> <span>+</span></div>
-          <div class="faq-a">Passwords vary in length and have low entropy. AES-256 strictly requires an exact 256-bit (32-byte) pseudo-random key. PBKDF2 stretches the password through 100,000 iterations of HMAC-SHA256, adding a random 16-byte salt to thwart rainbow table and dictionary attacks.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q"><span>Q5: Why does saving as JPEG destroy stego data?</span> <span>+</span></div>
-          <div class="faq-a">JPEG uses lossy compression involving Discrete Cosine Transform (DCT), quantization, and high-frequency rounding. This alters individual pixel values upon saving, corrupting the delicate least significant bits. PNG uses lossless DEFLATE compression, preserving every bit perfectly.</div>
-        </div>
-
-      </div>
     </section>
 
   </main>
