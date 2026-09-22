@@ -4,6 +4,12 @@ A complete, beginner-friendly **Computer Network Security (CNS) Mini Project** d
 
 ---
 
+## 🌐 Live Public Web App (No Installation Needed!)
+The application is deployed publicly on GitHub Pages and runs entirely in your browser using the native Web Crypto API and HTML5 Canvas:  
+👉 **[https://sanathbrao.github.io/secure-image-steganography-cns/](https://sanathbrao.github.io/secure-image-steganography-cns/)**
+
+---
+
 ## 📌 Project Overview
 
 This project unites **authenticated modern cryptography** and **spatial-domain image steganography** into a single cohesive pipeline:
@@ -18,7 +24,8 @@ This project unites **authenticated modern cryptography** and **spatial-domain i
 
 ## 🚀 Key Features
 
-- **Modern Web Dashboard**: Interactive Streamlit interface with dedicated tabs for Embedding, Extraction, System Architecture, and Academic Viva Prep.
+- **Standard Modern Web App (No Streamlit)**: Built using standard HTML5, CSS3, JavaScript, and a Flask REST API backend (`app.py`).
+- **Zero-Installation Live Demo**: Runs client-side on GitHub Pages via browser Web Crypto API, or locally via Python Flask.
 - **Zero-Storage Security**: Passwords are never saved in memory or on disk.
 - **Authenticated Decryption**: Incorrect passwords and tampered images trigger immediate AES-GCM tag verification failure.
 - **Lossless Export**: Generates pure PNG images to preserve bit-level integrity against lossy compression.
@@ -31,7 +38,13 @@ This project unites **authenticated modern cryptography** and **spatial-domain i
 
 ```
 cns_image_steganography/
-├── app.py                  # Streamlit Web Application
+├── index.html              # Public entrypoint for GitHub Pages
+├── templates/
+│   └── index.html          # Flask Web Application template
+├── static/
+│   ├── style.css           # Modern responsive design & UI cards
+│   └── app.js              # Dual-Engine: Flask API client + Web Crypto engine
+├── app.py                  # Python Flask web server & REST API
 ├── crypto_utils.py         # AES-256-GCM, PBKDF2, SHA-256, & payload packaging
 ├── steganography.py        # 24-bit RGB LSB embedding, extraction, & PSNR/MSE metrics
 ├── test_stego.py           # Automated test suite (8 unit tests)
@@ -40,47 +53,41 @@ cns_image_steganography/
 │   ├── sample_landscape.png
 │   ├── sample_geometric.png
 │   └── sample_avatar.png
-├── requirements.txt        # Project dependencies
+├── requirements.txt        # Project dependencies (Flask, Pillow, PyCryptodome, NumPy)
 ├── CNS_PROJECT_REPORT.md   # Complete academic project report & Viva Q&A
 └── README.md               # Quickstart and overview
 ```
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Local Installation & Setup
 
 ### 1. Prerequisites
 - Python 3.10+ (Recommended: Python 3.11 or 3.12)
 - pip or uv package manager
 
-### 2. Clone or Navigate to Directory
+### 2. Clone Repository
 ```bash
-cd C:\Users\santh\.gemini\antigravity\scratch\cns_image_steganography
+git clone https://github.com/SanathBRao/secure-image-steganography-cns.git
+cd secure-image-steganography-cns
 ```
 
-### 3. Create a Virtual Environment
-Using standard Python:
+### 3. Create a Virtual Environment & Install Dependencies
 ```bash
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-*Or using `uv` (recommended for ultra-fast setup):*
-```bash
-uv venv --python 3.12 .venv
-uv pip install --python .\.venv\Scripts\python.exe -r requirements.txt
-```
-
 ---
 
-## ▶️ Running the Application
+## ▶️ Running the Web Application (Flask)
 
-Launch the Streamlit web dashboard:
+Launch the Flask web server:
 ```bash
-.\.venv\Scripts\python.exe -m streamlit run app.py
+python app.py
 ```
-Open your browser at `http://localhost:8501`.
+Open your browser at **`http://localhost:5000`**.
 
 ---
 
@@ -88,7 +95,7 @@ Open your browser at `http://localhost:8501`.
 
 To verify all 8 test cases:
 ```bash
-.\.venv\Scripts\python.exe test_stego.py
+python test_stego.py
 ```
 
 ### Test Case Coverage:
@@ -108,7 +115,7 @@ To verify all 8 test cases:
 | Member | Primary Focus | Key Responsibilities |
 |---|---|---|
 | **Member 1** | **Cryptography & Key Management** | Implementation of `crypto_utils.py` (AES-256-GCM, PBKDF2 key stretching, random salt & nonce generation, SHA-256 digest, binary header serialization). |
-| **Member 2** | **Steganography & User Interface** | Implementation of `steganography.py` & `app.py` (LSB bitwise embedding/extraction, capacity checks, MSE/PSNR calculation, Streamlit UI controls, lossless PNG handling). |
+| **Member 2** | **Steganography & Web UI** | Implementation of `steganography.py` & `app.py` / frontend (LSB bitwise embedding/extraction, capacity checks, MSE/PSNR calculation, Flask & Web UI controls, lossless PNG handling). |
 
 ---
 

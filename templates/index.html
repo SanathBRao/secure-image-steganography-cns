@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Image Steganography | AES-256 & LSB</title>
+  <link rel="stylesheet" href="static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- Top Banner / Header -->
+  <header>
+    <div class="header-container">
+      <h1>🛡️ Secure Image Steganography</h1>
+      <p>Computer Network Security (CNS) Mini Project — Multi-Layer Protection via <strong>AES-256-GCM</strong> Authenticated Encryption and <strong>24-bit RGB LSB</strong> Data Hiding</p>
+      <div class="badge-row">
+        <span class="badge badge-blue">Cipher: AES-256-GCM</span>
+        <span class="badge badge-amber">KDF: PBKDF2 (100,000 iter)</span>
+        <span class="badge badge-green">Carrier: LSB 24-bit RGB</span>
+        <span class="badge badge-blue">Integrity: SHA-256</span>
+        <span class="badge badge-green">Format: Lossless PNG</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-hide">🔒 Hide Message (Embedding)</button>
+      <button class="tab-btn" data-tab="tab-extract">🔓 Extract Message (Extraction)</button>
+      <button class="tab-btn" data-tab="tab-how-it-works">ℹ️ How It Works & Architecture</button>
+      <button class="tab-btn" data-tab="tab-viva">🎓 Viva & CNS Reference</button>
+    </nav>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: HIDE MESSAGE                                                       -->
+    <!-- ========================================================================= -->
+    <section id="tab-hide" class="tab-content active">
+      <div class="grid-2">
+        
+        <!-- Left: Upload & Capacity -->
+        <div class="card">
+          <h2 class="card-title">1. Cover Image Selection</h2>
+          
+          <div class="form-group" id="samplePickerGroup" style="display:none;">
+            <label for="sampleSelect">Or select a pre-generated sample:</label>
+            <select id="sampleSelect">
+              <option value="">-- Choose a sample image --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Upload Cover Image (PNG recommended):</label>
+            <label class="file-dropzone" for="coverInput">
+              📁 Click to Browse or Drop Cover Image
+              <input type="file" id="coverInput" accept="image/png, image/bmp, image/jpeg" style="display:none;">
+            </label>
+          </div>
+
+          <div class="preview-box" id="coverPreview">
+            <span style="color: var(--text-muted);">No image selected</span>
+          </div>
+
+          <div class="alert alert-info" id="capacityStats">
+            Carrier capacity will be calculated upon selecting an image.
+          </div>
+        </div>
+
+        <!-- Right: Secret Credentials & Controls -->
+        <div class="card">
+          <h2 class="card-title">2. Secret Message & Encryption Credentials</h2>
+
+          <div class="form-group">
+            <label for="secretMessage">Secret Plaintext Message:</label>
+            <textarea id="secretMessage" rows="4" placeholder="Enter confidential message to conceal inside the image..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="embedPassword">Secret Passphrase:</label>
+            <input type="password" id="embedPassword" placeholder="Strong password for PBKDF2 key derivation">
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Passphrase:</label>
+            <input type="password" id="confirmPassword" placeholder="Re-enter password to verify">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="showPlaintextCheck">
+            <label for="showPlaintextCheck" style="cursor: pointer; margin: 0;">Preview plaintext message before embedding</label>
+          </div>
+
+          <div id="plaintextPreviewBox" style="display:none; background:#f1f5f9; padding:0.75rem; border-radius:6px; font-family:monospace;" id="plaintextPreviewText">
+            <span id="plaintextPreviewText"></span>
+          </div>
+
+          <button class="btn btn-primary" id="btnEmbed">
+            🔒 Encrypt Message & Embed in Image
+          </button>
+
+          <div id="embedAlert" class="alert" style="display:none;"></div>
+        </div>
+
+      </div>
+
+      <!-- Result Card (Stego Image & Telemetry) -->
+      <div class="card" id="embedResultCard" style="display:none; margin-top:2rem;">
+        <h2 class="card-title">3. Generated Stego Image & Telemetry</h2>
+        
+        <div class="grid-2">
+          <div>
+            <div class="preview-box" style="margin-bottom: 1rem;">
+              <img id="stegoPreview" src="" alt="Stego Image Output">
+            </div>
+            <a id="btnDownloadStego" class="btn btn-success" style="width: 100%; text-decoration: none;">
+              ⬇️ Download Stego Image (Lossless PNG)
+            </a>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+              ⚠️ Lossless preservation notice: Always save and transmit as PNG. JPEG compression destroys LSB data.
+            </p>
+          </div>
+
+          <div>
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">📊 Security & Quality Metrics</h3>
+            <div class="telemetry-grid">
+              <div class="metric-card">
+                <div class="metric-val" id="telemetryAlgorithm">AES-256-GCM</div>
+                <div class="metric-lbl">Cipher Mode</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-val" id="telemetryPsnr">-- dB</div>
+                <div class="metric-lbl">PSNR (Fidelity)</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-val" id="telemetryMse">--</div>
+                <div class="metric-lbl">Mean Squared Error</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-val" id="telemetryCapUsed">--%</div>
+                <div class="metric-lbl">Capacity Utilized</div>
+              </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-size: 0.85rem;">
+              <strong>Cryptographic Manifest:</strong><br>
+              • Random Salt (16B): <code id="telemetrySalt">--</code><br>
+              • Nonce / IV (12B): <code id="telemetryNonce">--</code><br>
+              • Auth Tag (16B): <code id="telemetryTag">--</code><br>
+              • SHA-256 Digest: <code id="telemetrySha">--</code><br>
+              • Payload Size: <strong id="telemetryPayload">--</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: EXTRACT MESSAGE                                                    -->
+    <!-- ========================================================================= -->
+    <section id="tab-extract" class="tab-content">
+      <div class="grid-2">
+        
+        <!-- Left: Upload Stego -->
+        <div class="card">
+          <h2 class="card-title">1. Upload Stego Image</h2>
+          <div class="form-group">
+            <label>Select Stego PNG Image:</label>
+            <label class="file-dropzone" for="stegoInput">
+              📁 Click to Browse or Drop Stego PNG
+              <input type="file" id="stegoInput" accept="image/png, image/bmp" style="display:none;">
+            </label>
+          </div>
+          <div class="preview-box" id="stegoExtractPreview">
+            <span style="color: var(--text-muted);">No stego image loaded</span>
+          </div>
+        </div>
+
+        <!-- Right: Decryption Credentials -->
+        <div class="card">
+          <h2 class="card-title">2. Decryption Credentials</h2>
+          <div class="form-group">
+            <label for="extractPassword">Secret Passphrase:</label>
+            <input type="password" id="extractPassword" placeholder="Enter passphrase used during embedding">
+          </div>
+
+          <button class="btn btn-primary" id="btnExtract">
+            🔓 Extract & Decrypt Message
+          </button>
+
+          <div id="extractAlert" class="alert" style="display:none;"></div>
+        </div>
+
+      </div>
+
+      <!-- Extract Results -->
+      <div class="card" id="extractResultCard" style="display:none; margin-top:2rem;">
+        <h2 class="card-title">3. Authentication & Recovered Message</h2>
+
+        <div class="verify-grid">
+          <div class="verify-box" id="badgeHeader">
+            <strong>HEADER</strong><br><small>Magic check</small>
+          </div>
+          <div class="verify-box" id="badgeTag">
+            <strong>AUTH TAG</strong><br><small>AES-GCM integrity</small>
+          </div>
+          <div class="verify-box" id="badgeSha">
+            <strong>SHA-256</strong><br><small>Plaintext hash</small>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Decrypted Plaintext Secret Message:</label>
+          <textarea id="extractedMessage" rows="5" readonly style="background:#f8fafc; font-weight:600; color:#0f172a;"></textarea>
+        </div>
+
+        <div>
+          <label>Technical Telemetry:</label>
+          <pre id="cryptoDetails"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: HOW IT WORKS                                                       -->
+    <!-- ========================================================================= -->
+    <section id="tab-how-it-works" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">System Architecture & Mathematical Foundations</h2>
+        
+        <div class="grid-2">
+          <div>
+            <h3 style="margin-bottom: 0.75rem;">🔒 Sender Pipeline (Embedding)</h3>
+            <div class="workflow-step">
+              <strong>1. SHA-256 Integrity Hash:</strong> Computes a 256-bit hash of the original plaintext message for second-layer validation.
+            </div>
+            <div class="workflow-step">
+              <strong>2. PBKDF2 Key Derivation:</strong> Derives a 256-bit AES key from user passphrase using 100,000 iterations of HMAC-SHA256 and a 16-byte random salt.
+            </div>
+            <div class="workflow-step">
+              <strong>3. AES-256-GCM Encryption:</strong> Generates a 12-byte nonce. Encrypts plaintext and yields ciphertext + a 16-byte authentication tag.
+            </div>
+            <div class="workflow-step">
+              <strong>4. Binary Header Packaging:</strong>
+              <code>['STEG' (4B)] + [Salt (16B)] + [Nonce (12B)] + [Tag (16B)] + [SHA256 (32B)] + [CT_Len (4B)] + [Ciphertext]</code>
+            </div>
+            <div class="workflow-step">
+              <strong>5. LSB Spatial Insertion:</strong> Replaces bit 0 of Red, Green, and Blue pixel channels with payload bits. Saved as lossless PNG.
+            </div>
+          </div>
+
+          <div>
+            <h3 style="margin-bottom: 0.75rem;">🔓 Receiver Pipeline (Extraction)</h3>
+            <div class="workflow-step">
+              <strong>1. LSB Extraction:</strong> Reads first 32 bits from RGB pixel channels to determine payload length N, then reads N bytes.
+            </div>
+            <div class="workflow-step">
+              <strong>2. Header Validation:</strong> Checks for the <code>'STEG'</code> magic identifier.
+            </div>
+            <div class="workflow-step">
+              <strong>3. Key Reconstruction:</strong> Feeds user-supplied passphrase and extracted 16-byte Salt into PBKDF2.
+            </div>
+            <div class="workflow-step">
+              <strong>4. Authenticated Decryption:</strong> AES-256-GCM decrypts ciphertext and verifies the 16-byte GMAC tag. If password is wrong or bits flipped, halts immediately.
+            </div>
+            <div class="workflow-step">
+              <strong>5. SHA-256 Verification:</strong> Confirms decrypted plaintext hash matches the embedded hash, proving 100% data integrity.
+            </div>
+          </div>
+        </div>
+
+        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border-color);">
+
+        <h3 style="margin-bottom: 0.5rem;">🔬 Bitwise LSB Mechanism (Spatial Domain)</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">
+          In 24-bit True Color RGB images, each pixel consists of 3 bytes (Red, Green, Blue) from 0 to 255:
+        </p>
+        <pre>
+Original Pixel Channel Byte : 1 0 1 1 0 1 1 0  (Value = 182)
+Clear LSB with mask 0xFE    : 1 0 1 1 0 1 1 0 & 1 1 1 1 1 1 1 0 -> 1 0 1 1 0 1 1 0
+Secret bit to hide          : 1
+Resulting Stego Channel     : 1 0 1 1 0 1 1 1  (Value = 183)
+Difference                  : +1 intensity unit (Imperceptible to Human Visual System!)
+        </pre>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: VIVA REFERENCE                                                     -->
+    <!-- ========================================================================= -->
+    <section id="tab-viva" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">🎓 Academic Viva Preparation & Project Defense</h2>
+
+        <div class="grid-2" style="margin-bottom: 1.5rem;">
+          <div style="background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid var(--border-color);">
+            <h4 style="color: var(--primary); margin-bottom:0.5rem;">👥 Member 1: Cryptography & Key Management</h4>
+            <ul style="padding-left: 1.25rem; font-size: 0.9rem;">
+              <li>Implementation of <strong>AES-256-GCM</strong> authenticated encryption.</li>
+              <li>Design of <strong>PBKDF2</strong> with 100,000 iterations and 16-byte random salt.</li>
+              <li>Dual-layer integrity with <strong>SHA-256</strong> hashing.</li>
+              <li>Packaging of the 84-byte binary payload header format.</li>
+            </ul>
+          </div>
+          <div style="background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid var(--border-color);">
+            <h4 style="color: var(--primary); margin-bottom:0.5rem;">👥 Member 2: Steganography & Web Application</h4>
+            <ul style="padding-left: 1.25rem; font-size: 0.9rem;">
+              <li>Implementation of <strong>24-bit RGB LSB</strong> spatial embedding & extraction.</li>
+              <li>Image capacity calculation and boundary checks.</li>
+              <li>Computation of <strong>MSE</strong> and <strong>PSNR</strong> image quality metrics.</li>
+              <li>Full-stack Web UI design and responsive controls.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">❓ High-Frequency Viva Questions & Answers</h3>
+
+        <div class="faq-item">
+          <div class="faq-q"><span>Q1: What is the difference between Cryptography and Steganography?</span> <span>+</span></div>
+          <div class="faq-a">Cryptography protects the confidentiality of data by converting plaintext into unreadable ciphertext. Steganography conceals the very existence of the message by hiding it inside an innocuous carrier medium (such as an image). Cryptography makes data secret; steganography makes data invisible.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q"><span>Q2: Why combine AES-256 with LSB steganography in this project?</span> <span>+</span></div>
+          <div class="faq-a">This provides Defense-in-Depth. If an adversary discovers the steganographic carrier (steganalysis), they cannot read the secret data because it is encrypted with military-grade AES-256. Conversely, if encrypted data was sent in the open, it would immediately attract suspicion; hiding it in an image conceals the transmission.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q"><span>Q3: Why use AES-GCM mode instead of AES-CBC or AES-ECB?</span> <span>+</span></div>
+          <div class="faq-a">AES-ECB does not use an IV and reveals data patterns. AES-CBC provides confidentiality but not authenticity (vulnerable to padding oracle attacks). AES-GCM (Galois/Counter Mode) is an AEAD (Authenticated Encryption with Associated Data) scheme that simultaneously provides high-speed confidentiality AND a 128-bit authentication tag to immediately detect tampering or incorrect passwords.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q"><span>Q4: Why is PBKDF2 needed instead of using the user's password directly?</span> <span>+</span></div>
+          <div class="faq-a">Passwords vary in length and have low entropy. AES-256 strictly requires an exact 256-bit (32-byte) pseudo-random key. PBKDF2 stretches the password through 100,000 iterations of HMAC-SHA256, adding a random 16-byte salt to thwart rainbow table and dictionary attacks.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q"><span>Q5: Why does saving as JPEG destroy stego data?</span> <span>+</span></div>
+          <div class="faq-a">JPEG uses lossy compression involving Discrete Cosine Transform (DCT), quantization, and high-frequency rounding. This alters individual pixel values upon saving, corrupting the delicate least significant bits. PNG uses lossless DEFLATE compression, preserving every bit perfectly.</div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="static/app.js"></script>
+</body>
+</html>
