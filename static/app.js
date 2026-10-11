@@ -54,7 +54,39 @@ const badgeTag = document.getElementById("badgeTag");
 const badgeSha = document.getElementById("badgeSha");
 const cryptoDetails = document.getElementById("cryptoDetails");
 
-// Plaintext preview toggle
+// Password visibility toggle
+document.querySelectorAll(".input-eye-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const targetId = btn.getAttribute("data-target");
+    const input = document.getElementById(targetId);
+    if (input) {
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
+      } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+      }
+    }
+  });
+});
+
+// Copy extracted message to clipboard
+const btnCopyExtracted = document.getElementById("btnCopyExtracted");
+if (btnCopyExtracted) {
+  btnCopyExtracted.addEventListener("click", () => {
+    if (extractedMessage.value) {
+      navigator.clipboard.writeText(extractedMessage.value);
+      btnCopyExtracted.textContent = "✓ Copied!";
+      setTimeout(() => {
+        btnCopyExtracted.textContent = "📋 Copy Message";
+      }, 2000);
+    }
+  });
+}
+
+// Plaintext preview toggle & character counter
+const charCountLabel = document.getElementById("charCountLabel");
 showPlaintextCheck.addEventListener("change", () => {
   if (showPlaintextCheck.checked && secretMessage.value) {
     plaintextPreviewText.textContent = secretMessage.value;
@@ -63,7 +95,12 @@ showPlaintextCheck.addEventListener("change", () => {
     plaintextPreviewBox.style.display = "none";
   }
 });
+
 secretMessage.addEventListener("input", () => {
+  const len = secretMessage.value.length;
+  if (charCountLabel) {
+    charCountLabel.textContent = `${len} chars | ~${84 + len} B payload`;
+  }
   if (showPlaintextCheck.checked) {
     plaintextPreviewText.textContent = secretMessage.value;
     plaintextPreviewBox.style.display = secretMessage.value ? "block" : "none";

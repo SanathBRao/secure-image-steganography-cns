@@ -13,13 +13,13 @@
   <header>
     <div class="header-container">
       <h1>🛡️ Secure Image Steganography</h1>
-      <p>Computer Network Security (CNS) Mini Project — Multi-Layer Protection via <strong>AES-256-GCM</strong> Authenticated Encryption and <strong>24-bit RGB LSB</strong> Data Hiding</p>
+      <p>Computer Network Security (CNS) Mini Project — Multi-Layer Defense using <strong>AES-256-GCM Authenticated Encryption</strong> and <strong>24-bit RGB LSB Data Hiding</strong></p>
       <div class="badge-row">
-        <span class="badge badge-blue">Cipher: AES-256-GCM</span>
-        <span class="badge badge-amber">KDF: PBKDF2 (100,000 iter)</span>
-        <span class="badge badge-green">Carrier: LSB 24-bit RGB</span>
-        <span class="badge badge-blue">Integrity: SHA-256</span>
-        <span class="badge badge-green">Format: Lossless PNG</span>
+        <span class="badge badge-blue">🔐 Cipher: AES-256-GCM</span>
+        <span class="badge badge-amber">⚙️ KDF: PBKDF2 (100k rounds)</span>
+        <span class="badge badge-green">🖼️ Carrier: 24-bit RGB LSB</span>
+        <span class="badge badge-blue">🛡️ Integrity: SHA-256</span>
+        <span class="badge badge-green">📦 Format: Lossless PNG</span>
       </div>
     </div>
   </header>
@@ -29,8 +29,12 @@
     
     <!-- Navigation Tabs -->
     <nav class="tabs-nav">
-      <button class="tab-btn active" data-tab="tab-hide">🔒 Hide Message (Embedding)</button>
-      <button class="tab-btn" data-tab="tab-extract">🔓 Extract Message (Extraction)</button>
+      <button class="tab-btn active" data-tab="tab-hide">
+        <span>🔒</span> Hide Message (Embedding)
+      </button>
+      <button class="tab-btn" data-tab="tab-extract">
+        <span>🔓</span> Extract Message (Extraction)
+      </button>
     </nav>
 
     <!-- ========================================================================= -->
@@ -41,57 +45,72 @@
         
         <!-- Left: Upload & Capacity -->
         <div class="card">
-          <h2 class="card-title">1. Cover Image Selection</h2>
+          <h2 class="card-title">
+            <span class="step-pill">Step 1</span> Cover Image Selection
+          </h2>
           
           <div class="form-group" id="samplePickerGroup" style="display:none;">
-            <label for="sampleSelect">Or select a pre-generated sample:</label>
+            <label for="sampleSelect">Or choose a pre-generated sample image:</label>
             <select id="sampleSelect">
               <option value="">-- Choose a sample image --</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Upload Cover Image (or Paste directly with <strong>Ctrl + V</strong>):</label>
+            <label>Upload Cover Image:</label>
             <label class="file-dropzone" for="coverInput">
-              📁 Click to Browse, Drag & Drop, or 📋 <strong>Paste Image (Ctrl + V)</strong>
+              <div class="dropzone-icon">🖼️</div>
+              <div class="dropzone-title">Click to Browse, Drag & Drop, or Paste (Ctrl + V)</div>
+              <div class="dropzone-sub">Supports PNG, BMP, JPG (Exported strictly as lossless PNG)</div>
               <input type="file" id="coverInput" accept="image/png, image/bmp, image/jpeg" style="display:none;">
             </label>
           </div>
 
           <div class="preview-box" id="coverPreview">
-            <span style="color: var(--text-muted);">No image selected</span>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">No cover image loaded</span>
           </div>
 
           <div class="alert alert-info" id="capacityStats">
-            Carrier capacity will be calculated upon selecting an image.
+            ℹ️ Carrier capacity will be computed upon selecting an image.
           </div>
         </div>
 
         <!-- Right: Secret Credentials & Controls -->
         <div class="card">
-          <h2 class="card-title">2. Secret Message & Encryption Credentials</h2>
+          <h2 class="card-title">
+            <span class="step-pill">Step 2</span> Secret Message & Encryption
+          </h2>
 
           <div class="form-group">
-            <label for="secretMessage">Secret Plaintext Message:</label>
-            <textarea id="secretMessage" rows="4" placeholder="Enter confidential message to conceal inside the image..."></textarea>
+            <label for="secretMessage">
+              <span>Secret Plaintext Message:</span>
+              <span id="charCountLabel" style="font-weight: 500; font-size: 0.8rem; color: var(--text-muted);">0 chars</span>
+            </label>
+            <textarea id="secretMessage" rows="4" placeholder="Enter confidential message to encrypt and conceal into the image..."></textarea>
           </div>
 
           <div class="form-group">
             <label for="embedPassword">Secret Passphrase:</label>
-            <input type="password" id="embedPassword" placeholder="Strong password for PBKDF2 key derivation">
+            <div class="input-with-action">
+              <input type="password" id="embedPassword" placeholder="Strong passphrase for PBKDF2 key derivation">
+              <button type="button" class="input-eye-btn" data-target="embedPassword" title="Toggle password visibility">👁️</button>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="confirmPassword">Confirm Passphrase:</label>
-            <input type="password" id="confirmPassword" placeholder="Re-enter password to verify">
+            <div class="input-with-action">
+              <input type="password" id="confirmPassword" placeholder="Re-enter passphrase to confirm">
+              <button type="button" class="input-eye-btn" data-target="confirmPassword" title="Toggle password visibility">👁️</button>
+            </div>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <input type="checkbox" id="showPlaintextCheck">
-            <label for="showPlaintextCheck" style="cursor: pointer; margin: 0;">Preview plaintext message before embedding</label>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+            <input type="checkbox" id="showPlaintextCheck" style="width: auto; cursor: pointer;">
+            <label for="showPlaintextCheck" style="cursor: pointer; margin: 0; font-size: 0.85rem;">Preview secret message in plaintext before embedding</label>
           </div>
 
-          <div id="plaintextPreviewBox" style="display:none; background:#f1f5f9; padding:0.75rem; border-radius:6px; font-family:monospace;" id="plaintextPreviewText">
+          <div id="plaintextPreviewBox" style="display:none; background:#f1f5f9; padding:0.75rem 1rem; border-radius:6px; font-family:monospace; border:1px solid var(--border);">
             <span id="plaintextPreviewText"></span>
           </div>
 
@@ -106,7 +125,9 @@
 
       <!-- Result Card (Stego Image & Telemetry) -->
       <div class="card" id="embedResultCard" style="display:none; margin-top:2rem;">
-        <h2 class="card-title">3. Generated Stego Image & Telemetry</h2>
+        <h2 class="card-title">
+          <span class="step-pill">Result</span> Generated Stego Image & Telemetry
+        </h2>
         
         <div class="grid-2">
           <div>
@@ -116,13 +137,13 @@
             <a id="btnDownloadStego" class="btn btn-success" style="width: 100%; text-decoration: none;">
               ⬇️ Download Stego Image (Lossless PNG)
             </a>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
-              ⚠️ Lossless preservation notice: Always save and transmit as PNG. JPEG compression destroys LSB data.
-            </p>
+            <div class="tip-banner" style="margin-top: 0.75rem;">
+              ⚠️ <strong>Lossless Preservation Notice:</strong> Always share and transmit as <strong>PNG</strong>. Sending over chat apps (like WhatsApp) as standard photos compresses pixels into lossy JPEG, destroying the embedded bits!
+            </div>
           </div>
 
           <div>
-            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">📊 Security & Quality Metrics</h3>
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: #1e293b;">📊 Security & Quality Metrics</h3>
             <div class="telemetry-grid">
               <div class="metric-card">
                 <div class="metric-val" id="telemetryAlgorithm">AES-256-GCM</div>
@@ -138,17 +159,19 @@
               </div>
               <div class="metric-card">
                 <div class="metric-val" id="telemetryCapUsed">--%</div>
-                <div class="metric-lbl">Capacity Utilized</div>
+                <div class="metric-lbl">Capacity Used</div>
               </div>
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-size: 0.85rem;">
-              <strong>Cryptographic Manifest:</strong><br>
-              • Random Salt (16B): <code id="telemetrySalt">--</code><br>
-              • Nonce / IV (12B): <code id="telemetryNonce">--</code><br>
-              • Auth Tag (16B): <code id="telemetryTag">--</code><br>
-              • SHA-256 Digest: <code id="telemetrySha">--</code><br>
-              • Payload Size: <strong id="telemetryPayload">--</strong>
+            <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; margin-top: 1rem; font-size: 0.85rem;">
+              <strong style="color: #0f172a; font-size: 0.9rem;">🔐 Cryptographic Manifest:</strong>
+              <div style="display: grid; grid-template-columns: 1fr; gap: 0.4rem; margin-top: 0.6rem;">
+                <div>• Random Salt (16B): <code id="telemetrySalt">--</code></div>
+                <div>• Nonce / IV (12B): <code id="telemetryNonce">--</code></div>
+                <div>• Auth Tag (16B): <code id="telemetryTag">--</code></div>
+                <div>• SHA-256 Digest: <code id="telemetrySha">--</code></div>
+                <div>• Total Payload: <strong id="telemetryPayload">--</strong></div>
+              </div>
             </div>
           </div>
         </div>
@@ -163,37 +186,46 @@
         
         <!-- Left: Upload Stego -->
         <div class="card">
-          <h2 class="card-title">1. Upload Stego Image</h2>
+          <h2 class="card-title">
+            <span class="step-pill">Input</span> Upload Stego Image
+          </h2>
           
-          <button id="btnLoadDemoStego" type="button" class="btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; width:100%; font-size:0.9rem; padding:0.6rem;">
+          <button id="btnLoadDemoStego" type="button" class="btn btn-secondary" style="width:100%; font-size:0.9rem; padding:0.75rem;">
             🧪 Load Demo Stego Image (Passphrase: <code>demo123</code>)
           </button>
 
           <div class="form-group">
             <label>Select Stego PNG Image (or Paste directly with <strong>Ctrl + V</strong>):</label>
             <label class="file-dropzone" for="stegoInput">
-              📁 Click to Browse, Drag & Drop, or 📋 <strong>Paste Image (Ctrl + V)</strong>
+              <div class="dropzone-icon">📥</div>
+              <div class="dropzone-title">Click to Browse, Drag & Drop, or Paste (Ctrl + V)</div>
+              <div class="dropzone-sub">Drop the stego PNG file here</div>
               <input type="file" id="stegoInput" accept="image/png, image/bmp" style="display:none;">
             </label>
           </div>
           <div class="preview-box" id="stegoExtractPreview">
-            <span style="color: var(--text-muted);">No stego image loaded (or press Ctrl + V to paste)</span>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">No stego image loaded (or press Ctrl + V)</span>
           </div>
 
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.75rem; font-size:0.85rem; color:#475569; margin-top:0.5rem;">
-            💡 <strong>Can't find downloaded file or pasting from WhatsApp?</strong><br>
-            • <strong>Press Ctrl + J</strong> in your browser to view your Downloads, and drag the file directly into the box.<br>
-            • <strong>Clipboard:</strong> Copy the image and press <strong>Ctrl + V</strong> anywhere on this page.<br>
-            • ⚠️ <strong>WhatsApp / Discord Warning:</strong> Always send stego images as an uncompressed <em>Document / File</em>. Sending as a regular photo applies lossy JPEG compression that destroys hidden data!
+          <div class="tip-banner">
+            💡 <strong>Quick Extraction Tips:</strong><br>
+            • <strong>Browser Downloads:</strong> Press <strong>Ctrl + J</strong> and drag the downloaded file straight into the box above.<br>
+            • <strong>Clipboard:</strong> Copy the image from your recipient and press <strong>Ctrl + V</strong> anywhere on this page.<br>
+            • ⚠️ <strong>Chat Apps:</strong> When sending via WhatsApp or Telegram, send as an uncompressed <em>Document / File</em> to prevent lossy recompression!
           </div>
         </div>
 
         <!-- Right: Decryption Credentials -->
         <div class="card">
-          <h2 class="card-title">2. Decryption Credentials</h2>
+          <h2 class="card-title">
+            <span class="step-pill">Auth</span> Decryption Credentials
+          </h2>
           <div class="form-group">
             <label for="extractPassword">Secret Passphrase:</label>
-            <input type="password" id="extractPassword" placeholder="Enter passphrase used during embedding">
+            <div class="input-with-action">
+              <input type="password" id="extractPassword" placeholder="Enter passphrase used during embedding">
+              <button type="button" class="input-eye-btn" data-target="extractPassword" title="Toggle password visibility">👁️</button>
+            </div>
           </div>
 
           <button class="btn btn-primary" id="btnExtract">
@@ -207,29 +239,37 @@
 
       <!-- Extract Results -->
       <div class="card" id="extractResultCard" style="display:none; margin-top:2rem;">
-        <h2 class="card-title">3. Authentication & Recovered Message</h2>
+        <h2 class="card-title">
+          <span class="step-pill">Verified</span> Authentication & Recovered Message
+        </h2>
 
         <div class="verify-grid">
           <div class="verify-box" id="badgeHeader">
-            <strong>HEADER</strong><br><small>Magic check</small>
+            <strong>HEADER</strong><small>Magic signature</small>
           </div>
           <div class="verify-box" id="badgeTag">
-            <strong>AUTH TAG</strong><br><small>AES-GCM integrity</small>
+            <strong>AUTH TAG</strong><small>AES-GCM integrity</small>
           </div>
           <div class="verify-box" id="badgeSha">
-            <strong>SHA-256</strong><br><small>Plaintext hash</small>
+            <strong>SHA-256</strong><small>Plaintext hash</small>
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 1rem;">
-          <label>Decrypted Plaintext Secret Message:</label>
-          <textarea id="extractedMessage" rows="5" readonly style="background:#f8fafc; font-weight:600; color:#0f172a;"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label style="margin: 0; font-weight: 700;">Decrypted Plaintext Secret Message:</label>
+            <button type="button" id="btnCopyExtracted" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+              📋 Copy Message
+            </button>
+          </div>
+          <textarea id="extractedMessage" rows="5" readonly style="background:#f8fafc; font-weight:600; color:#0f172a; font-family:inherit;"></textarea>
         </div>
 
         <div>
-          <label>Technical Telemetry:</label>
+          <label style="margin-bottom: 0.4rem;">Technical Telemetry:</label>
           <pre id="cryptoDetails"></pre>
         </div>
+      </div>
     </section>
 
   </main>
